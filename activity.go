@@ -73,6 +73,23 @@ func Deposit(ctx context.Context, data PaymentDetails) (string, error) {
 	return confirmation, err
 }
 
+func DepositV1(ctx context.Context, data PaymentDetails) (string, error) {
+	// add delay 20sec
+	time.Sleep(20 * time.Second)
+
+	log.Printf("Depositing $%d into account %s.\n\n",
+		data.Amount,
+		data.TargetAccount,
+	)
+
+	referenceID := fmt.Sprintf("%s-deposit", data.ReferenceID)
+	bank := BankingService{"bank-api.example.com"}
+	// Uncomment the next line and comment the one after that to simulate an unknown failure
+	// confirmation, err := bank.DepositThatFails(data.TargetAccount, data.Amount, referenceID)
+	confirmation, err := bank.Deposit(data.TargetAccount, data.Amount, referenceID)
+	return confirmation, err
+}
+
 // @@@SNIPEND
 
 // @@@SNIPSTART money-transfer-project-template-go-activity-refund

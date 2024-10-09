@@ -26,6 +26,7 @@ func main() {
 	w.RegisterActivity(app.WithdrawV1)
 	w.RegisterActivity(app.WithdrawV2)
 	w.RegisterActivity(app.Deposit)
+	w.RegisterActivity(app.DepositV1)
 	w.RegisterActivity(app.Refund)
 
 	// Start listening to the Task Queue.
