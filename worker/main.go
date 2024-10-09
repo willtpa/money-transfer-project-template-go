@@ -24,6 +24,7 @@ func main() {
 	w.RegisterWorkflow(app.MoneyTransfer)
 	w.RegisterActivity(app.Withdraw)
 	w.RegisterActivity(app.WithdrawV1)
+	w.RegisterActivity(app.WithdrawV2)
 	w.RegisterActivity(app.Deposit)
 	w.RegisterActivity(app.Refund)
 

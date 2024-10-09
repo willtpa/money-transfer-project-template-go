@@ -36,15 +36,21 @@ func MoneyTransfer(ctx workflow.Context, input PaymentDetails) (string, error) {
 	var depositOutput string
 
 	// Withdraw money.
-	withdrawalVersioning := workflow.GetVersion(ctx, "withdrawal-feature", workflow.DefaultVersion, 1)
+	withdrawalVersioning := workflow.GetVersion(ctx, "withdrawal-feature", workflow.DefaultVersion, 2)
 	if withdrawalVersioning == workflow.DefaultVersion {
 		withdrawErr := workflow.ExecuteActivity(ctx, Withdraw, input).Get(ctx, &withdrawOutput)
 
 		if withdrawErr != nil {
 			return "", withdrawErr
 		}
-	} else {
+	} else if withdrawalVersioning == 1 {
 		withdrawErr := workflow.ExecuteActivity(ctx, WithdrawV1, input).Get(ctx, &withdrawOutput)
+
+		if withdrawErr != nil {
+			return "", withdrawErr
+		}
+	} else {
+		withdrawErr := workflow.ExecuteActivity(ctx, WithdrawV2, input).Get(ctx, &withdrawOutput)
 
 		if withdrawErr != nil {
 			return "", withdrawErr
