@@ -36,67 +36,30 @@ func MoneyTransfer(ctx workflow.Context, input PaymentDetails) (string, error) {
 	var depositOutput string
 
 	// Withdraw money.
-	withdrawalVersioning := workflow.GetVersion(ctx, "withdrawal-feature", workflow.DefaultVersion, 2)
-	if withdrawalVersioning == workflow.DefaultVersion {
-		withdrawErr := workflow.ExecuteActivity(ctx, Withdraw, input).Get(ctx, &withdrawOutput)
+	withdrawErr := workflow.ExecuteActivity(ctx, WithdrawV2, input).Get(ctx, &withdrawOutput)
 
-		if withdrawErr != nil {
-			return "", withdrawErr
-		}
-	} else if withdrawalVersioning == 1 {
-		withdrawErr := workflow.ExecuteActivity(ctx, WithdrawV1, input).Get(ctx, &withdrawOutput)
-
-		if withdrawErr != nil {
-			return "", withdrawErr
-		}
-	} else {
-		withdrawErr := workflow.ExecuteActivity(ctx, WithdrawV2, input).Get(ctx, &withdrawOutput)
-
-		if withdrawErr != nil {
-			return "", withdrawErr
-		}
+	if withdrawErr != nil {
+		return "", withdrawErr
 	}
 
 	// Deposit money.
-	depositVersioning := workflow.GetVersion(ctx, "deposit-feature", workflow.DefaultVersion, 1)
-	if depositVersioning == workflow.DefaultVersion {
-		depositErr := workflow.ExecuteActivity(ctx, Deposit, input).Get(ctx, &depositOutput)
+	depositErr := workflow.ExecuteActivity(ctx, DepositV1, input).Get(ctx, &depositOutput)
 
-		if depositErr != nil {
-			// The deposit failed; put money back in original account.
+	if depositErr != nil {
+		// The deposit failed; put money back in original account.
 
-			var result string
+		var result string
 
-			refundErr := workflow.ExecuteActivity(ctx, Refund, input).Get(ctx, &result)
+		refundErr := workflow.ExecuteActivity(ctx, Refund, input).Get(ctx, &result)
 
-			if refundErr != nil {
-				return "",
-					fmt.Errorf("Deposit: failed to deposit money into %v: %v. Money could not be returned to %v: %w",
-						input.TargetAccount, depositErr, input.SourceAccount, refundErr)
-			}
-
-			return "", fmt.Errorf("Deposit: failed to deposit money into %v: Money returned to %v: %w",
-				input.TargetAccount, input.SourceAccount, depositErr)
+		if refundErr != nil {
+			return "",
+				fmt.Errorf("Deposit: failed to deposit money into %v: %v. Money could not be returned to %v: %w",
+					input.TargetAccount, depositErr, input.SourceAccount, refundErr)
 		}
-	} else {
-		depositErr := workflow.ExecuteActivity(ctx, DepositV1, input).Get(ctx, &depositOutput)
 
-		if depositErr != nil {
-			// The deposit failed; put money back in original account.
-
-			var result string
-
-			refundErr := workflow.ExecuteActivity(ctx, Refund, input).Get(ctx, &result)
-
-			if refundErr != nil {
-				return "",
-					fmt.Errorf("Deposit: failed to deposit money into %v: %v. Money could not be returned to %v: %w",
-						input.TargetAccount, depositErr, input.SourceAccount, refundErr)
-			}
-
-			return "", fmt.Errorf("Deposit: failed to deposit money into %v: Money returned to %v: %w",
-				input.TargetAccount, input.SourceAccount, depositErr)
-		}
+		return "", fmt.Errorf("Deposit: failed to deposit money into %v: Money returned to %v: %w",
+			input.TargetAccount, input.SourceAccount, depositErr)
 	}
 
 	result := fmt.Sprintf("Transfer complete (transaction IDs: %s, %s)", withdrawOutput, depositOutput)

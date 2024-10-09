@@ -28,7 +28,7 @@ func main() {
 	}
 
 	options := client.StartWorkflowOptions{
-		ID:        "pay-invoice-705",
+		ID:        "pay-invoice-706",
 		TaskQueue: app.MoneyTransferTaskQueueName,
 	}
 
