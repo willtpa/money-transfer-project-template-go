@@ -23,6 +23,21 @@ func Withdraw(ctx context.Context, data PaymentDetails) (string, error) {
 	return confirmation, err
 }
 
+func WithdrawV1(ctx context.Context, data PaymentDetails) (string, error) {
+	// add delay 10sec
+	time.Sleep(10 * time.Second)
+
+	log.Printf("Withdrawing $%d from account %s.\n\n",
+		data.Amount,
+		data.SourceAccount,
+	)
+
+	referenceID := fmt.Sprintf("%s-withdrawal", data.ReferenceID)
+	bank := BankingService{"bank-api.example.com"}
+	confirmation, err := bank.Withdraw(data.SourceAccount, data.Amount, referenceID)
+	return confirmation, err
+}
+
 // @@@SNIPEND
 
 // @@@SNIPSTART money-transfer-project-template-go-activity-deposit

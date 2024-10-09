@@ -23,6 +23,7 @@ func main() {
 	// This worker hosts both Workflow and Activity functions.
 	w.RegisterWorkflow(app.MoneyTransfer)
 	w.RegisterActivity(app.Withdraw)
+	w.RegisterActivity(app.WithdrawV1)
 	w.RegisterActivity(app.Deposit)
 	w.RegisterActivity(app.Refund)
 
